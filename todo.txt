@@ -1,0 +1,11 @@
+ToDo:
+
+Put all build artifacts into {workspace}/build. (.o, .lst, .objdump, .hex .elf .map). The .o should not live in the submodules
+
+Put all target artifacts into {workspace}/target (.map, .elf, .hex). Nothing should be built into the submodules
+
+Revert submodules. We should never touch them. They should be read only.
+
+Pull in config/stm32h5sx_hal_conf.h. this file decides what files we pull in.
+
+Create and modify gitignore.

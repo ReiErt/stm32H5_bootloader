@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "stm32h5xx.h": "c",
+        "stm32h563xx.h": "c",
+        "stm32h5xx_hal_def.h": "c",
+        "stm32h5xx_hal.h": "c",
+        "usart.h": "c",
+        "gpio.h": "c",
+        "main.h": "c",
+        "stm32h5xx_hal_pwr.h": "c",
+        "stm32h5xx_hal_gpio.h": "c",
+        "stm32h5xx_hal_rcc.h": "c"
+    },
+    "C_Cpp.default.compilerPath": "c:\\Program Files (x86)\\Arm GNU Toolchain arm-none-eabi\\14.2 rel1\\bin\\arm-none-eabi-gcc.exe"
+}
