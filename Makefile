@@ -1,6 +1,8 @@
 # Name of the final output file (without extension)
 TARGET = blink
 
+BUILD_DIR = build
+
 # Target ARM Cortex core (STM32H563ZI uses Cortex-M33)
 MCU = cortex-m33
 
@@ -39,7 +41,7 @@ CFLAGS = $(CPU_FLAGS) -Wall -O0 -g $(INCLUDES) -DSTM32H563xx
 # Linker flags
 # -T: use the custom linker script
 # -nostartfiles: do not link the standard startup files
-LDFLAGS = -TSTM32H563ZITx_FLASH.ld $(CPU_FLAGS) -nostartfiles
+LDFLAGS = -TSTM32H563ZITx_FLASH.ld $(CPU_FLAGS) -nostartfiles -Wl,-Map=$(BUILD_DIR)/$(TARGET).map
 
 SOURCES = main.c \
 		  $(STARTUP) \
@@ -50,31 +52,34 @@ SOURCES = main.c \
 		  lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal_cortex.c
 
 # List of object files to compile and link
-OBJS = main.o \
-       lib/STM32CubeH5/Drivers/CMSIS/Device/ST/STM32H5xx/Source/Templates/system_stm32h5xx.o \
-       lib/STM32CubeH5/Drivers/CMSIS/Device/ST/STM32H5xx/Source/Templates/gcc/startup_stm32h563xx.o \
-	   lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal.o \
-       lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal_gpio.o \
-       lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal_rcc.o \
-	   lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal_cortex.o
+OBJS = $(BUILD_DIR)/main.o \
+       $(BUILD_DIR)/lib/STM32CubeH5/Drivers/CMSIS/Device/ST/STM32H5xx/Source/Templates/system_stm32h5xx.o \
+       $(BUILD_DIR)/lib/STM32CubeH5/Drivers/CMSIS/Device/ST/STM32H5xx/Source/Templates/gcc/startup_stm32h563xx.o \
+	   $(BUILD_DIR)/lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal.o \
+       $(BUILD_DIR)/lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal_gpio.o \
+       $(BUILD_DIR)/lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal_rcc.o \
+	   $(BUILD_DIR)/lib/STM32CubeH5/Drivers/STM32H5xx_HAL_Driver/Src/STM32h5xx_hal_cortex.o
 
 # Default rule to build the ELF output
-all: $(TARGET).elf
+all: $(BUILD_DIR)/$(TARGET).elf
 
 # Rule to link all object files into the final ELF binary
-$(TARGET).elf: $(OBJS)
+$(BUILD_DIR)/$(TARGET).elf: $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
-	arm-none-eabi-objcopy -O ihex $@ $(TARGET).hex
+	arm-none-eabi-objcopy -O ihex $@ $(BUILD_DIR)/$(TARGET).hex
+	arm-none-eabi-objdump -d $@ > $(BUILD_DIR)/$(TARGET).lst
 
-# Rule to build C source files into .o object files
-%.o: %.c
+# Compile C files to build/ path
+$(BUILD_DIR)/%.o: %.c
+	@if not exist "$(dir $@)" mkdir "$(dir $@)"
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Rule to build assembly source files into .o object files
-%.o: %.s
+# Compile assembly files to build/ path
+$(BUILD_DIR)/%.o: %.s
+	@if not exist "$(dir $@)" mkdir "$(dir $@)"
 	$(CC) $(CPU_FLAGS) -c $< -o $@
 
 
 # Clean rule (Windows-friendly `del` command to remove build artifacts)
 clean:
-	del /Q *.o *.elf *.hex 2>nul || exit 0
+	del /Q /S $(BUILD_DIR)\* 2>nul || echo Nothing to clean
